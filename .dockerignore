@@ -1,0 +1,16 @@
+.git
+node_modules
+.env
+.env.*
+!.env.example
+data
+*.log
+
+*.pem
+*.key
+*.p12
+*.pfx
+*.bundle
+*.bak
+logs
+backups

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>运营后台 · 预约管理</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* 系统运行总开关面板（黑白编辑部风，1px 线 / 方角 / 无阴影） */
+    .sys-panel { display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      border: 1px solid #111; padding: 16px 18px; margin: 0 0 22px; flex-wrap: wrap; }
+    .sys-panel.is-paused { border-width: 2px; background: repeating-linear-gradient(45deg, #fafafa, #fafafa 10px, #f0f0f0 10px, #f0f0f0 20px); }
+    .sys-info { display: flex; align-items: center; gap: 14px; }
+    .sys-dot { width: 12px; height: 12px; border: 1px solid #111; flex: none; border-radius: 50%; }
+    .sys-dot.is-running { background: #111; }
+    .sys-dot.is-paused { background: #fff; }
+    .sys-title { font-weight: 700; font-size: 16px; letter-spacing: .02em; }
+    .sys-sub { color: #8a8a8a; font-size: 12.5px; margin-top: 3px; max-width: 52ch; }
+    #sysToggleBtn { flex: none; padding: 10px 18px; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html"><span class="brand-logo">预约管理</span><span class="brand-name">运营后台</span></a>
+      <nav class="main-nav"><a href="index.html">前台首页</a></nav>
+    </div>
+  </header>
+
+  <main class="admin-wrap">
+    <div class="container">
+      <!-- 登录 -->
+      <div class="form-card admin-login" id="loginBox">
+        <h1 style="font-size:22px;margin:0 0 6px">运营登录</h1>
+        <p class="form-sub">输入运营令牌以管理订单。令牌由部署者在本地配置。</p>
+        <div class="field"><label>运营令牌</label><input id="tokenInput" type="password" placeholder="Admin Token" /></div>
+        <div class="form-error" id="loginErr"></div>
+        <button class="btn-primary-block" id="loginBtn">登录</button>
+      </div>
+
+      <!-- 面板 -->
+      <div class="state-hide" id="adminPanel">
+        <div class="admin-bar">
+          <h1>订单管理</h1>
+          <button class="btn-sm" id="logoutBtn">退出登录</button>
+        </div>
+
+        <!-- 系统运行总开关：暂停后停止一切对官网的自动操作（抢号 / 发码 / 监控） -->
+        <div class="sys-panel" id="sysPanel">
+          <div class="sys-info">
+            <span class="sys-dot" id="sysDot"></span>
+            <div>
+              <div class="sys-title" id="sysTitle">系统状态加载中…</div>
+              <div class="sys-sub" id="sysSub"></div>
+            </div>
+          </div>
+          <button class="btn-sm" id="sysToggleBtn" disabled>…</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="admin-table">
+            <thead><tr><th>订单号</th><th>领区</th><th>申请人</th><th>出境日</th><th>日期要求</th><th>状态</th><th>验证码</th><th>受理编号</th><th>操作</th></tr></thead>
+            <tbody id="ordersBody"><tr><td colspan="9" class="admin-empty">加载中…</td></tr></tbody>
+          </table>
+        </div>
+        <p style="color:#a3a3a3;font-size:13px;margin-top:16px">
+          说明：系统会自动监测官网放号并在有名额时自动提交预约；抢约成功的订单受理编号先置为「待从官网获取」，运营人员需登录官网核对后点「确认预约」填入<strong>官网返回的真实受理编号</strong>（必填，系统不会凭空生成）。
+          自动抢约依赖用户在订单页填入官网短信验证码：系统会自动发码并短信提醒用户，用户填入后本列表自动刷新（官方验证码有效期约 5 分钟）。「索要验证码」按钮供运营在需要时手动触发一次发码。验证码在预约成功或订单取消后即从系统删除。
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script src="page-init.js"></script>
+</body>
+</html>

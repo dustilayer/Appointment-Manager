@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>订单详情 · 预约管理</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html"><span class="brand-logo">预约管理</span><span class="brand-name">韩签代预约</span></a>
+      <nav class="main-nav"><a href="index.html">首页</a><a href="index.html#region">立即预约</a><a href="recover.html">恢复订单</a><a href="help.html">帮助中心</a></nav>
+    </div>
+  </header>
+
+  <main class="order-wrap" id="orderRoot">
+    <div class="container-narrow">
+      <div class="order-summary">
+        <div>
+          <div class="os-id" id="osId">订单</div>
+          <div class="os-name" id="osName">—</div>
+        </div>
+        <div class="order-status" id="osStatus">加载中</div>
+      </div>
+
+      <!-- 处理中 -->
+      <div class="order-card state-hide" id="processingCard">
+        <div class="status-processing">
+          <div class="sp-emoji"></div>
+          <h2>预约处理中</h2>
+          <p id="processingMsg">正在加载订单状态…</p>
+          <p id="processingApptReq" class="appt-req state-hide"></p>
+          <div class="spinner"></div>
+        </div>
+
+        <div class="detail-table" style="margin:20px 0">
+          <div class="detail-row"><div class="d-key">手机号码</div><div class="d-val" id="pDphone">—</div></div>
+          <div class="detail-row"><div class="d-key">日期偏好</div><div class="d-val" id="pDdatePref">—</div></div>
+        </div>
+
+        <!-- 官网名额历史动态 -->
+        <div style="margin:20px 0;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;background:#fafafa">
+          <div style="font-size:13px;font-weight:600;color:#111;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+            <span>官网名额动态 · 近 <span id="apWindowMin">30</span> 分钟</span>
+            <span id="apDot" style="width:8px;height:8px;border-radius:50%;background:#94a3b8" title="实时数据"></span>
+          </div>
+          <div id="availabilityList" style="max-height:160px;overflow-y:auto;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1.6">
+            <div style="color:#94a3b8;text-align:center;padding:8px 0">加载中…</div>
+          </div>
+        </div>
+
+        <!-- 验证码输入：运营在官网提交预约、官方向用户手机发送验证码时出现 -->
+        <div class="code-box state-hide" id="codeBox">
+          <div class="code-title">请填写官方短信验证码</div>
+          <p class="code-msg">系统正在官网为您抢约，官方已向您的手机发送短信验证码。请在收到后尽快填入（验证码有效期约 5 分钟），填入后系统会在有效期内自动为您提交预约。我们只会将它用于本次预约提交。</p>
+          <div class="code-row">
+            <input id="codeInput" maxlength="8" inputmode="numeric" autocomplete="one-time-code" placeholder="短信验证码" />
+            <button class="btn-primary-block" id="codeSubmit" style="width:auto;padding:13px 28px">提交验证码</button>
+          </div>
+          <div class="form-error" id="codeErr"></div>
+        </div>
+        <div class="code-box state-hide" id="codeDone">
+          <div class="code-title">验证码已提交</div>
+          <p class="code-msg">系统正在官网为您完成预约，成功后会短信通知并在本页显示确认书。</p>
+        </div>
+
+        <!-- 等待验证码：提交后或验证码过期后，处于等待下一次自动发码的空档期 -->
+        <div class="code-box state-hide" id="autoCertifyWaiting">
+          <div class="code-title">正在为您准备验证码</div>
+          <p class="code-msg" id="autoCertifyWaitingMsg">系统即将通过官网向您的手机发送短信验证码，请稍候（最长 5 分钟）。收到后本页面会自动出现输入框。</p>
+        </div>
+
+        <!-- 自动抢号: 系统主动向官网请求验证码，用户输入后系统自动校验+抢名额 -->
+        <div class="code-box state-hide" id="autoCertifyBox">
+          <div class="code-title">请填写官方短信验证码</div>
+          <p class="code-msg">系统已通过官网向您的手机发送了短信验证码，请在收到后尽快填入。确认后，一旦官网出现符合您日期偏好的名额，系统将立即为您完成预约（验证码有效期 5 分钟）。</p>
+          <div class="code-row">
+            <input id="autoCertifyInput" maxlength="8" inputmode="numeric" autocomplete="one-time-code" placeholder="短信验证码" />
+            <button class="btn-primary-block" id="autoCertifySubmit" style="width:auto;padding:13px 28px">确认验证码</button>
+          </div>
+          <div class="form-error" id="autoCertifyErr"></div>
+        </div>
+        <div class="code-box state-hide" id="autoCertifyDone">
+          <div class="code-title">验证码已确认</div>
+          <p class="code-msg" id="autoCertifyDoneMsg">系统正在持续监听官网，一旦出现符合您日期偏好的名额，会自动为您完成预约。</p>
+        </div>
+
+        <div class="state-hide" id="resendCertifyRow" style="margin-top:14px;text-align:center;font-size:12px;color:#64748b">
+          没收到短信或需要新验证码?
+          <button id="resendCertifyBtn" style="margin-left:8px;padding:5px 14px;font-size:12px;border:1px solid #cbd5e1;background:#fff;border-radius:6px;cursor:pointer">重新发送</button>
+          <div id="resendCertifyErr" style="color:#dc2626;margin-top:6px;min-height:14px"></div>
+        </div>
+      </div>
+
+      <!-- 已取消 -->
+      <div class="order-card state-hide" id="cancelledCard">
+        <div class="status-processing">
+          <div class="sp-emoji"></div>
+          <h2 style="color:#b91c1c">订单已取消</h2>
+          <p>本单已停止后续自动处理。如有已发出的官方预约请求，请联系运营人员核对官网结果。</p>
+        </div>
+      </div>
+
+      <!-- 预约成功 -->
+      <div class="order-card state-hide" id="successCard">
+        <h2>预约成功</h2>
+        <p class="confirm-title" id="confirmTitle">预约申请确认书</p>
+
+        <div class="receipt-box">
+          <div class="receipt-label">预先预约受理编号</div>
+          <div class="receipt-code" id="receiptCode">—</div>
+          <button class="btn-copy" id="copyBtn">复制受理编号</button>
+          <div class="receipt-hint">这是您在官网「提前预约查询」核对本次预约的凭证，请截图或复制保存</div>
+        </div>
+
+        <div class="detail-table">
+          <div class="detail-row"><div class="d-key">住宅区</div><div class="d-val" id="dProvinces">—</div></div>
+          <div class="detail-row"><div class="d-key">签证种类</div><div class="d-val" id="dVisaType">—</div></div>
+          <div class="detail-row"><div class="d-key">预约时间</div><div class="d-val" id="dAppt">—</div></div>
+          <div class="detail-row"><div class="d-key">访问者名</div><div class="d-val" id="dName">—</div></div>
+          <div class="detail-row"><div class="d-key">与签证申请人的关系</div><div class="d-val" id="dRelation">—</div></div>
+          <div class="detail-row"><div class="d-key">手机号码</div><div class="d-val" id="dPhone">—</div></div>
+          <div class="detail-row"><div class="d-key">出境日子</div><div class="d-val" id="dExit">—</div></div>
+          <div class="detail-row" id="dApptReqRow"><div class="d-key">日期要求</div><div class="d-val" id="dApptReq">—</div></div>
+          <div class="detail-row"><div class="d-key">签证申请人数</div><div class="d-val" id="dApplicants">—</div></div>
+        </div>
+
+        <div class="steps">
+          <div class="step"><span class="step-num">1</span><span>去官网「提前预约查询」，用受理编号（或姓名 + 手机号）核对本次预约</span></div>
+          <div class="step"><span class="step-num">2</span><span>按官网指引备齐签证申请材料（护照、照片、申请表等）</span></div>
+          <div class="step"><span class="step-num">3</span><span>按预约时间到「<span id="dCenter">领区</span>」递交——迟到 / 爽约，名额会作废</span></div>
+        </div>
+
+        <a class="btn-official" href="#" id="dCenter2Link">去官网核对预约 →</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-copy">© 2026 预约管理 · 韩国签证（上海 / 广州 / 北京 / 西安）自动预约协助。本站为独立第三方服务，与使领馆及签证中心无关联。</div>
+      <nav class="footer-links"><a href="recover.html">恢复订单</a><a href="help.html">帮助中心</a><a href="terms.html">服务条款</a><a href="privacy.html">隐私政策</a></nav>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="page-init.js"></script>
+</body>
+</html>

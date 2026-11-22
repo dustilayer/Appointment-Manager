@@ -1,4 +1,4 @@
-[繁體中文](README.md) ｜ [简体中文](README.zh-CN.md) ｜ [English](README.en.md)
+[English](README.md) · [中文简介](README.zh-CN.md) · [繁體中文](README.zh-TW.md)
 
 # 预约与订单管理工具
 
